@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NHẬU ONLINE</title>
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+font-family:Arial,sans-serif;
+background:#10131d;
+color:white;
+text-align:center;
+}
+header{
+padding:25px;
+background:#191d2b;
+border-bottom:2px solid #d6a34a;
+}
+h1{color:#e7b75b;font-size:35px}
+.subtitle{color:#ccc}
+.container{padding:30px 15px}
+.rooms{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+max-width:950px;
+margin:30px auto;
+}
+.room{
+background:#22283a;
+padding:25px;
+border-radius:15px;
+border:1px solid #4b5268;
+}
+.room h2{color:#f3c66b}
+button{
+background:#d6a34a;
+color:#171717;
+border:0;
+padding:13px 25px;
+border-radius:8px;
+font-weight:bold;
+cursor:pointer;
+}
+footer{padding:25px;color:#999}
+</style>
+</head>
+<body>
+<header>
+<h1>🍻 NHẬU ONLINE</h1>
+<p class="subtitle">Kết nối bạn bè - Cùng nhau vui vẻ</p>
+</header>
+<div class="container">
+<h2>Chào mừng đến với thế giới NHẬU ONLINE</h2>
+<p>Chọn không gian của bạn</p>
+<div class="rooms">
+<div class="room">
+<h2>🍺 Phòng cộng đồng</h2>
+<p>Gặp gỡ và kết nối bạn bè</p>
+<button onclick="joinRoom('Cộng đồng')">Tham gia</button>
+</div>
+<div class="room">
+<h2>🥂 Phòng riêng</h2>
+<p>Tạo không gian riêng tư</p>
+<button onclick="joinRoom('Riêng tư')">Tham gia</button>
+</div>
+<div class="room">
+<h2>🎤 Karaoke</h2>
+<p>Hát cùng bạn bè</p>
+<button onclick="joinRoom('Karaoke')">Tham gia</button>
+</div>
+<div class="room">
+<h2>🎮 Trò chơi</h2>
+<p>Thử thách vui cùng bạn bè</p>
+<button onclick="joinRoom('Trò chơi')">Tham gia</button>
+</div>
+</div>
+</div>
+<footer>© 2026 NHẬU ONLINE</footer>
+<script>
+function joinRoom(room){
+alert("Chào mừng bạn đến với phòng "+room+"!");
+}
+</script>
+</body>
+</html>
