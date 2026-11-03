@@ -80,8 +80,87 @@ footer{padding:25px;color:#999}
 </div>
 <footer>© 2026 NHẬU ONLINE</footer>
 <script>
-function joinRoom(room){
-alert("Chào mừng bạn đến với phòng "+room+"!");
+function joinRoom(room) {
+    const name = prompt("Nhập tên của bạn để tham gia phòng:");
+
+    if (!name || !name.trim()) {
+        return;
+    }
+
+    document.getElementById("room-screen")?.remove();
+
+    const screen = document.createElement("div");
+    screen.id = "room-screen";
+
+    screen.style.cssText = `
+        position:fixed;
+        inset:0;
+        z-index:9999;
+        background:#10131d;
+        color:white;
+        padding:25px;
+        font-family:Arial,sans-serif;
+        text-align:center;
+        overflow:auto;
+    `;
+
+    screen.innerHTML = `
+        <h1 style="color:#fdbb35">
+            🍻 ${room}
+        </h1>
+
+        <p>Xin chào ${name}!</p>
+
+        <div id="chat-box" style="
+            background:#222838;
+            border:1px solid #fdbb35;
+            border-radius:12px;
+            height:55vh;
+            max-width:700px;
+            margin:20px auto;
+            padding:15px;
+            overflow-y:auto;
+            text-align:left;
+        ">
+            <p>🍻 Chào mừng bạn đến với ${room}!</p>
+        </div>
+
+        <div style="max-width:700px;margin:auto;display:flex;gap:8px">
+            <input id="chat-input"
+                placeholder="Nhập tin nhắn..."
+                style="flex:1;min-width:0;padding:14px;border-radius:8px;border:0">
+
+            <button onclick="sendMessage()">
+                Gửi
+            </button>
+        </div>
+
+        <br>
+
+        <button onclick="
+            document.getElementById('room-screen').remove()
+        ">
+            ← Quay lại trang chủ
+        </button>
+    `;
+
+    document.body.appendChild(screen);
+    window.currentUser = name.trim();
+}
+
+function sendMessage() {
+    const input = document.getElementById("chat-input");
+    const box = document.getElementById("chat-box");
+
+    if (!input || !input.value.trim()) return;
+
+    const message = document.createElement("p");
+    message.textContent =
+        window.currentUser + ": " + input.value.trim();
+
+    box.appendChild(message);
+    input.value = "";
+    box.scrollTop = box.scrollHeight;
 }
 </script>
 </body>
