@@ -178,9 +178,11 @@ async function getSupabase() {
         </button>
     `;
 
-    document.body.appendChild(screen);
+document.body.appendChild(screen);
 window.currentUser = name.trim();
 currentRoom = room;
+      
+loadMessages(room);
 listenForMessages(room);
 }
 async function listenForMessages(room) {
@@ -216,6 +218,39 @@ async function listenForMessages(room) {
             }
         )
         .subscribe();
+}
+  async function loadMessages(room) {
+    const box = document.getElementById("chat-box");
+    if (!box) return;
+
+    box.innerHTML = "";
+
+    try {
+        const client = await getSupabase();
+
+        const { data, error } = await client
+            .from("messages")
+            .select("username, content, created_at")
+            .eq("room", room)
+            .order("created_at", { ascending: true })
+            .limit(100);
+
+        if (error) {
+            console.error("Lỗi tải tin nhắn:", error);
+            return;
+        }
+
+        data.forEach(msg => {
+            const p = document.createElement("p");
+            p.textContent = msg.username + ": " + msg.content;
+            box.appendChild(p);
+        });
+
+        box.scrollTop = box.scrollHeight;
+
+    } catch (error) {
+        console.error("Lỗi Supabase:", error);
+    }
 }
 async function sendMessage() {
     const input = document.getElementById("chat-input");
