@@ -179,10 +179,44 @@ async function getSupabase() {
     `;
 
     document.body.appendChild(screen);
-    window.currentUser = name.trim();
-    currentRoom = room;
+window.currentUser = name.trim();
+currentRoom = room;
+listenForMessages(room);
 }
+async function listenForMessages(room) {
+    const client = await getSupabase();
 
+    if (currentChannel) {
+        await client.removeChannel(currentChannel);
+    }
+
+    currentChannel = client
+        .channel("room-" + room)
+        .on(
+            "postgres_changes",
+            {
+                event: "INSERT",
+                schema: "public",
+                table: "messages",
+                filter: "room=eq." + room
+            },
+            (payload) => {
+                const msg = payload.new;
+
+                if (msg.username === window.currentUser) return;
+
+                const box = document.getElementById("chat-box");
+                if (!box) return;
+
+                const p = document.createElement("p");
+                p.textContent = msg.username + ": " + msg.content;
+
+                box.appendChild(p);
+                box.scrollTop = box.scrollHeight;
+            }
+        )
+        .subscribe();
+}
 async function sendMessage() {
     const input = document.getElementById("chat-input");
     const box = document.getElementById("chat-box");
