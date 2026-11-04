@@ -1,297 +1,217 @@
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>NHẬU ONLINE</title>
 <style>
 *{box-sizing:border-box}
-body{
-margin:0;
-font-family:Arial,sans-serif;
-background:#10131d;
-color:white;
-text-align:center;
-}
-header{
-padding:25px;
-background:#191d2b;
-border-bottom:2px solid #d6a34a;
-}
-h1{color:#e7b75b;font-size:35px}
-.subtitle{color:#ccc}
-.container{padding:30px 15px}
-.rooms{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-gap:20px;
-max-width:950px;
-margin:30px auto;
-}
-.room{
-background:#22283a;
-padding:25px;
-border-radius:15px;
-border:1px solid #4b5268;
-}
+body{margin:0;background:#10131d;color:white;font-family:Arial,sans-serif}
+header{padding:25px 15px;text-align:center;background:#191d2b;border-bottom:2px solid #d6a34a}
+h1{color:#e7b75b;margin:5px}
+header p{color:#ccc}
+.container{padding:25px 15px;max-width:1000px;margin:auto;text-align:center}
+.welcome{margin:25px 0}
+.welcome h2{color:#f3c66b}
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:25px auto}
+.room{background:linear-gradient(145deg,#252d43,#191e2e);padding:25px 15px;border:1px solid #555d70;border-radius:16px}
 .room h2{color:#f3c66b}
-button{
-background:#d6a34a;
-color:#171717;
-border:0;
-padding:13px 25px;
-border-radius:8px;
-font-weight:bold;
-cursor:pointer;
-}
-footer{padding:25px;color:#999}
+.room p{color:#ccc;min-height:38px}
+button{background:#d6a34a;color:#171717;border:0;padding:13px 20px;border-radius:9px;font-weight:bold;font-size:15px;cursor:pointer}
+button:active{opacity:.8}
+.online{color:#72df9a;margin:15px}
+footer{text-align:center;padding:25px;color:#999}
+#room-screen{position:fixed;inset:0;z-index:9999;background:#10131d;padding:20px 14px;overflow:auto;text-align:center}
+#chat-box{background:#222838;border:1px solid #d6a34a;border-radius:12px;height:55vh;max-width:700px;margin:20px auto;padding:15px;overflow-y:auto;text-align:left;overflow-wrap:anywhere}
+#chat-box p{padding:9px;border-bottom:1px solid #41485a}
+.chat-form{max-width:700px;margin:auto;display:flex;gap:8px}
+#chat-input{flex:1;min-width:0;padding:13px;border-radius:8px;border:1px solid #555;background:#fff;color:#111;font-size:16px}
+.back{background:#555;color:white;margin-top:18px}
+.small{color:#aaa;font-size:13px}
 </style>
 </head>
 <body>
 <header>
 <h1>🍻 NHẬU ONLINE</h1>
-<p class="subtitle">Kết nối bạn bè - Cùng nhau vui vẻ</p>
+<p>Kết nối bạn bè - Cùng nhau vui vẻ</p>
 </header>
+
 <div class="container">
-<h2>Chào mừng đến với thế giới NHẬU ONLINE</h2>
-<p>Chọn không gian của bạn</p>
+<div class="welcome">
+<h2>Chào mừng đến với NHẬU ONLINE</h2>
+<p>Không gian giải trí và kết nối bạn bè</p>
+<div class="online">🟢 Sẵn sàng kết nối</div>
+</div>
+
+<h2>🎉 Chọn không gian của bạn</h2>
+
 <div class="rooms">
 <div class="room">
-<h2>🍺 Phòng cộng đồng</h2>
-<p>Gặp gỡ và kết nối bạn bè</p>
+<h2>🍺 Cộng đồng</h2>
+<p>Gặp gỡ và trò chuyện với mọi người</p>
 <button onclick="joinRoom('Cộng đồng')">Tham gia</button>
 </div>
+
 <div class="room">
 <h2>🥂 Phòng riêng</h2>
-<p>Tạo không gian riêng tư</p>
+<p>Không gian trò chuyện riêng tư</p>
 <button onclick="joinRoom('Riêng tư')">Tham gia</button>
 </div>
+
 <div class="room">
 <h2>🎤 Karaoke</h2>
-<p>Hát cùng bạn bè</p>
-<button onclick="joinRoom('Karaoke')">Tham gia</button>
+<p>Giao lưu và hát cùng bạn bè</p>
+<button onclick="joinRoom('Karaoke')">Vào Karaoke</button>
 </div>
+
 <div class="room">
-<h2>🎮 Trò chơi</h2>
-<p>Thử thách vui cùng bạn bè</p>
-<button onclick="joinRoom('Trò chơi')">Tham gia</button>
+<h2>🎮 Board Game</h2>
+<p>Thử thách và giải trí cùng bạn bè</p>
+<button onclick="joinRoom('Trò chơi')">Vào trò chơi</button>
 </div>
 </div>
+<p class="small">Karaoke và Board Game hiện là phòng giao lưu thử nghiệm.</p>
 </div>
-<footer>© 2026 NHẬU ONLINE</footer>
+
+<footer>© 2026 NHẬU ONLINE - Play, Sing & Connect</footer>
+
 <script>
+const SUPABASE_URL="https://pazfwdgmojkdblfgikwg.supabase.co";
+const SUPABASE_KEY="sb_publishable__2bDRA8f4ar1Q7O1u9jqCw_j9sA5MNv";
 
-const SUPABASE_URL = "https://pazfwdgmojkdblfgikwg.supabase.co";
-const SUPABASE_KEY = "sb_publishable__2bDRA8f4ar1Q7O1u9jqCw_j9sA5MNv";
+let supabaseClient=null;
+let currentChannel=null;
+let currentRoom="";
+let currentUser="";
 
-let supabaseClient = null;
-let currentChannel = null;
-let currentRoom = "";
-let currentUser = "";
-let seenMessages = new Set();
-let pendingMessages = [];
+async function getSupabase(){
+ if(supabaseClient)return supabaseClient;
+ if(!window.supabase?.createClient){
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement("script");
+   script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+   script.onload=resolve;
+   script.onerror=()=>reject(new Error("Không tải được Supabase"));
+   document.head.appendChild(script);
+  });
+ }
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+ return supabaseClient;
+}
 
-async function getSupabase() {
-  if (supabaseClient) return supabaseClient;
+function joinRoom(room){
+ const name=prompt("Nhập tên của bạn:");
+ if(!name||!name.trim())return;
 
-  if (!window.supabase?.createClient) {
-    await new Promise((resolve, reject) => {
-      const script = document.createElement("script");
-      script.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
-      script.onload = resolve;
-      script.onerror = () => reject(
-        new Error("Không tải được thư viện Supabase")
-      );
-      document.head.appendChild(script);
-    });
+ document.getElementById("room-screen")?.remove();
+
+ const screen=document.createElement("div");
+ screen.id="room-screen";
+ screen.innerHTML=`
+ <h1 style="color:#f3c66b">🍻 ${room}</h1>
+ <p>Xin chào!</p>
+ <div id="chat-box"><p>🍻 Chào mừng bạn đến với ${room}!</p></div>
+ <div class="chat-form">
+ <input id="chat-input" placeholder="Nhập tin nhắn..." maxlength="1000">
+ <button id="send-button">Gửi</button>
+ </div>
+ <button class="back" id="back-button">← Quay lại trang chủ</button>
+ `;
+ document.body.appendChild(screen);
+
+ currentUser=name.trim();
+ currentRoom=room;
+
+ document.getElementById("send-button").onclick=sendMessage;
+ document.getElementById("chat-input").onkeydown=e=>{
+  if(e.key==="Enter")sendMessage();
+ };
+ document.getElementById("back-button").onclick=()=>{
+  screen.remove();
+  if(currentChannel&&supabaseClient){
+   supabaseClient.removeChannel(currentChannel);
+   currentChannel=null;
   }
+ };
 
-  supabaseClient = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_KEY
-  );
-
-  return supabaseClient;
+ loadMessages(room);
+ listenForMessages(room);
 }
 
-    function joinRoom(room) {
-    const name = prompt("Nhập tên của bạn để tham gia phòng:");
-
-    if (!name || !name.trim()) {
-        return;
-    }
-
-    document.getElementById("room-screen")?.remove();
-
-    const screen = document.createElement("div");
-    screen.id = "room-screen";
-
-    screen.style.cssText = `
-        position:fixed;
-        inset:0;
-        z-index:9999;
-        background:#10131d;
-        color:white;
-        padding:25px;
-        font-family:Arial,sans-serif;
-        text-align:center;
-        overflow:auto;
-    `;
-
-    screen.innerHTML = `
-        <h1 style="color:#fdbb35">
-            🍻 ${room}
-        </h1>
-
-        <p>Xin chào ${name}!</p>
-
-        <div id="chat-box" style="
-            background:#222838;
-            border:1px solid #fdbb35;
-            border-radius:12px;
-            height:55vh;
-            max-width:700px;
-            margin:20px auto;
-            padding:15px;
-            overflow-y:auto;
-            text-align:left;
-        ">
-            <p>🍻 Chào mừng bạn đến với ${room}!</p>
-        </div>
-
-        <div style="max-width:700px;margin:auto;display:flex;gap:8px">
-            <input id="chat-input"
-                placeholder="Nhập tin nhắn..."
-                style="flex:1;min-width:0;padding:14px;border-radius:8px;border:0">
-
-            <button onclick="sendMessage()">
-                Gửi
-            </button>
-        </div>
-
-        <br>
-
-        <button onclick="
-            document.getElementById('room-screen').remove()
-        ">
-            ← Quay lại trang chủ
-        </button>
-    `;
-
-document.body.appendChild(screen);
-window.currentUser = name.trim();
-currentRoom = room;
-      
-loadMessages(room);
-listenForMessages(room);
+function showMessage(username,content){
+ const box=document.getElementById("chat-box");
+ if(!box)return;
+ const p=document.createElement("p");
+ p.textContent=username+": "+content;
+ box.appendChild(p);
+ box.scrollTop=box.scrollHeight;
 }
-async function listenForMessages(room) {
-    const client = await getSupabase();
 
-    if (currentChannel) {
-        await client.removeChannel(currentChannel);
-    }
-
-    currentChannel = client
-        .channel("room-" + room)
-        .on(
-            "postgres_changes",
-            {
-                event: "INSERT",
-                schema: "public",
-                table: "messages",
-                filter: "room=eq." + room
-            },
-            (payload) => {
-                const msg = payload.new;
-
-                if (msg.username === window.currentUser) return;
-
-                const box = document.getElementById("chat-box");
-                if (!box) return;
-
-                const p = document.createElement("p");
-                p.textContent = msg.username + ": " + msg.content;
-
-                box.appendChild(p);
-                box.scrollTop = box.scrollHeight;
-            }
-        )
-        .subscribe();
+async function loadMessages(room){
+ const box=document.getElementById("chat-box");
+ if(!box)return;
+ box.innerHTML="<p>Đang tải tin nhắn...</p>";
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.from("messages")
+   .select("username,content,created_at")
+   .eq("room",room)
+   .order("created_at",{ascending:true})
+   .limit(100);
+  if(error)throw error;
+  box.innerHTML="";
+  data.forEach(msg=>showMessage(msg.username,msg.content));
+ }catch(error){
+  box.textContent="Không tải được tin nhắn: "+error.message;
+ }
 }
-  async function loadMessages(room) {
-    const box = document.getElementById("chat-box");
-    if (!box) return;
 
-    box.innerHTML = "";
-
-    try {
-        const client = await getSupabase();
-
-        const { data, error } = await client
-            .from("messages")
-            .select("username, content, created_at")
-            .eq("room", room)
-            .order("created_at", { ascending: true })
-            .limit(100);
-
-        if (error) {
-            console.error("Lỗi tải tin nhắn:", error);
-            return;
-        }
-
-        data.forEach(msg => {
-            const p = document.createElement("p");
-            p.textContent = msg.username + ": " + msg.content;
-            box.appendChild(p);
-        });
-
-        box.scrollTop = box.scrollHeight;
-
-    } catch (error) {
-        console.error("Lỗi Supabase:", error);
-    }
+async function listenForMessages(room){
+ try{
+  const client=await getSupabase();
+  if(currentChannel)await client.removeChannel(currentChannel);
+  currentChannel=client.channel("room-"+room)
+   .on("postgres_changes",{
+    event:"INSERT",
+    schema:"public",
+    table:"messages",
+    filter:"room=eq."+room
+   },payload=>{
+    const msg=payload.new;
+    if(msg.username===currentUser)return;
+    showMessage(msg.username,msg.content);
+   })
+   .subscribe();
+ }catch(error){
+  console.error("Realtime:",error);
+ }
 }
-async function sendMessage() {
-    const input = document.getElementById("chat-input");
-    const box = document.getElementById("chat-box");
 
-    if (!input || !input.value.trim()) return;
+async function sendMessage(){
+ const input=document.getElementById("chat-input");
+ if(!input||!input.value.trim())return;
+ const content=input.value.trim();
+ const username=currentUser;
+ if(!currentRoom||!username)return;
 
-    const content = input.value.trim();
-    const username = window.currentUser;
-
-    if (!currentRoom || !username) {
-        alert("Bạn chưa tham gia phòng!");
-        return;
-    }
-
-    try {
-        const client = await getSupabase();
-
-        const { error } = await client
-            .from("messages")
-            .insert({
-                room: currentRoom,
-                username: username,
-                content: content
-            });
-
-        if (error) {
-            alert("Lỗi gửi tin nhắn: " + error.message);
-            return;
-        }
-
-        const message = document.createElement("p");
-        message.textContent = username + ": " + content;
-
-        box.appendChild(message);
-        input.value = "";
-        box.scrollTop = box.scrollHeight;
-
-    } catch (error) {
-        alert("Lỗi Supabase: " + error.message);
-    }
+ const button=document.getElementById("send-button");
+ button.disabled=true;
+ try{
+  const client=await getSupabase();
+  const {error}=await client.from("messages").insert({
+   room:currentRoom,
+   username:username,
+   content:content
+  });
+  if(error)throw error;
+  showMessage(username,content);
+  input.value="";
+ }catch(error){
+  alert("Không gửi được tin nhắn: "+error.message);
+ }finally{
+  button.disabled=false;
+ }
 }
 </script>
 </body>
