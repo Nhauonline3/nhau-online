@@ -153,7 +153,16 @@ SUPABASE_URL,SUPABASE_KEY
 );
 return supabaseClient;
 }
+function getMemberKey(){
+  let key=localStorage.getItem("nhau_member_key");
 
+  if(!key){
+    key=crypto.randomUUID();
+    localStorage.setItem("nhau_member_key",key);
+  }
+
+  return key;
+}
 function askName(){
 const name=prompt("Nhập tên của bạn:");
 return name?.trim()||"";
@@ -173,8 +182,9 @@ const client=await getSupabase();
 const {data,error}=await client.rpc(
 "create_private_room",
 {
-p_name:roomName.trim(),
-p_host:name
+  p_name:roomName.trim(),
+  p_host:name,
+  p_member_key:getMemberKey()
 }
 );
 
@@ -212,8 +222,12 @@ try{
 const client=await getSupabase();
 
 const {data,error}=await client.rpc(
-"join_private_room",
-{p_code:code}
+  "join_private_room",
+  {
+    p_code:code,
+    p_member_key:getMemberKey(),
+    p_username:name
+  }
 );
 
 if(error)throw error;
