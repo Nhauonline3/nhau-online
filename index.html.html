@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NHẬU ONLINE</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#10131d;color:white;text-align:center}
+header{padding:25px 15px;background:#191d2b;border-bottom:2px solid #d6a34a}
+h1{color:#e7b75b;font-size:32px}
+.subtitle{color:#ccc}
+.container{padding:25px 15px;max-width:1000px;margin:auto}
+.rooms{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin:25px auto}
+.room{background:#22283a;padding:24px 15px;border-radius:15px;border:1px solid #4b5268}
+.room h2{color:#f3c66b}
+button{background:#d6a34a;color:#171717;border:0;padding:13px 20px;border-radius:8px;font-weight:bold;cursor:pointer;font-size:15px}
+button:active{opacity:.8}
+.secondary{background:#555;color:white}
+input{padding:14px;border-radius:8px;border:0;font-size:16px;min-width:0}
+.room input{width:100%;margin:8px 0}
+.room button{margin:5px}
+footer{padding:25px;color:#999}
+#room-screen{position:fixed;inset:0;z-index:9999;background:#10131d;color:white;padding:20px 15px;font-family:Arial,sans-serif;text-align:center;overflow:auto}
+#chat-box{background:#222838;border:1px solid #d6a34a;border-radius:12px;height:55vh;max-width:700px;margin:20px auto;padding:15px;overflow-y:auto;text-align:left}
+#chat-box p{padding:9px;border-bottom:1px solid #454b5d;overflow-wrap:anywhere}
+.chat-form{max-width:700px;margin:auto;display:flex;gap:8px}
+#chat-input{flex:1;width:50%}
+#room-screen h1{color:#fdbb35}
+#room-code{color:#f3c66b;font-size:28px;letter-spacing:5px;font-weight:bold}
+.small{color:#aaa;font-size:13px}
+.upgrade-button{display:block;margin:12px auto 0;background:#e7b75b;color:#171717}
+#room-members{max-width:700px;margin:14px auto;padding:12px;background:#1b2232;border:1px solid #4b5268;border-radius:10px;text-align:left}
+#room-members h3{margin:0 0 8px;color:#f3c66b;font-size:17px}
+.member-row{padding:8px 4px;border-bottom:1px solid #394154;overflow-wrap:anywhere}
+.member-row:last-child{border-bottom:0}
+.host-tag{color:#f3c66b;font-size:12px;margin-left:6px}
+.leave-button{display:block;margin:12px auto 0;background:#a94444;color:white}
+.account-card{max-width:520px;margin:18px auto;padding:18px;background:#1b2232;border:1px solid #4b5268;border-radius:14px;text-align:left}
+.account-card h2{margin:0 0 12px;color:#f3c66b;text-align:center}
+.account-card input{width:100%;margin:7px 0;background:#fff;color:#222}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.account-actions button{flex:1;min-width:130px}
+.account-message{font-size:14px;color:#b9c4d8;min-height:20px;margin:10px 0 0;overflow-wrap:anywhere}
+.account-email{color:#8ee0a4;text-align:center;overflow-wrap:anywhere}
+</style>
+</head>
+<body>
+<script>document.addEventListener("DOMContentLoaded",()=>{refreshAccountState();});</script>
+<header>
+<h1>🍻 NHẬU ONLINE</h1>
+<p class="subtitle">Kết nối bạn bè - Cùng nhau vui vẻ</p>
+</header>
+<div class="container">
+<div class="account-card" id="account-card">
+ <h2>👤 Tài khoản NHẬU ONLINE</h2>
+ <div id="account-logged-out">
+  <input id="account-email" type="email" autocomplete="email" placeholder="Email của bạn">
+  <input id="account-password" type="password" autocomplete="current-password" placeholder="Mật khẩu (ít nhất 8 ký tự)">
+  <div class="account-actions">
+   <button type="button" onclick="registerAccount()">Đăng ký</button>
+   <button type="button" class="secondary" onclick="loginAccount()">Đăng nhập</button>
+  </div>
+  <p class="small" style="text-align:center">Bạn vẫn có thể vào phòng với tư cách khách mà không cần đăng nhập.</p>
+ </div>
+ <div id="account-logged-in" style="display:none">
+  <p class="account-email" id="account-user-email"></p>
+  <div class="account-actions">
+   <button type="button" class="secondary" onclick="logoutAccount()">Đăng xuất</button>
+  </div>
+ </div>
+ <p class="account-message" id="account-message" aria-live="polite"></p>
+</div>
+<div class="welcome">
+<h2 style="color:#f3c66b">Chào mừng đến với NHẬU ONLINE</h2>
+<p>Không gian giải trí và kết nối bạn bè</p>
+<p style="color:#72df9a">🟢 Sẵn sàng kết nối</p>
+</div>
+<h2>🎉 Chọn không gian của bạn</h2>
+<div class="rooms">
+<div class="room">
+<h2>🍺 Cộng đồng</h2><p>Gặp gỡ và trò chuyện với mọi người</p>
+<button onclick="joinRoom('Cộng đồng')">Tham gia</button>
+</div>
+<div class="room">
+<h2>🥂 Phòng riêng</h2><p>Tạo phòng và mời bạn bè</p>
+<button onclick="createPrivateRoom()">＋ Tạo phòng</button>
+<hr style="border-color:#555;margin:18px 0">
+<input id="join-code" maxlength="6" placeholder="Nhập mã phòng">
+<button onclick="enterPrivateRoom()">Tham gia phòng</button>
+</div>
+<div class="room">
+<h2>🎤 Karaoke</h2><p>Hát cùng bạn bè</p>
+<button onclick="joinRoom('Karaoke')">Tham gia</button>
+</div>
+<div class="room">
+<h2>🎮 Trò chơi</h2><p>Thử thách vui cùng bạn bè</p>
+<button onclick="joinRoom('Trò chơi')">Tham gia</button>
+</div>
+</div>
+</div>
+<footer>© 2026 NHẬU ONLINE</footer>
+<script>
+const SUPABASE_URL="https://pazfwdgmojkdblfgikwg.supabase.co";
+const SUPABASE_KEY="sb_publishable__2bDRA8f4ar1Q7O1u9jqCw_j9sA5MNv";
+let supabaseClient=null,currentChannel=null,currentRoom="",currentUser="",memberRefreshTimer=null,currentPrivateCode="";
+async function getSupabase(){
+ if(supabaseClient)return supabaseClient;
+ if(!window.supabase?.createClient){
+  await new Promise((resolve,reject)=>{
+   const script=document.createElement("script");
+   script.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";
+   script.onload=resolve;script.onerror=()=>reject(new Error("Không tải được Supabase"));
+   document.head.appendChild(script);
+  });
+ }
+ supabaseClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+ return supabaseClient;
+}
+function setAccountMessage(message,isError=false){
+ const el=document.getElementById("account-message");
+ if(!el)return;
+ el.textContent=message;
+ el.style.color=isError?"#ff9b9b":"#b9c4d8";
+}
+function showAccountState(user){
+ const loggedOut=document.getElementById("account-logged-out");
+ const loggedIn=document.getElementById("account-logged-in");
+ const email=document.getElementById("account-user-email");
+ if(!loggedOut||!loggedIn)return;
+ if(user){
+  loggedOut.style.display="none";
+  loggedIn.style.display="block";
+  if(email)email.textContent="Đã đăng nhập: "+(user.email||"");
+ }else{
+  loggedOut.style.display="block";
+  loggedIn.style.display="none";
+  if(email)email.textContent="";
+ }
+}
+async function refreshAccountState(){
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.auth.getSession();
+  if(error)throw error;
+  showAccountState(data.session?.user||null);
+ }catch(error){
+  setAccountMessage("Không kiểm tra được tài khoản: "+error.message,true);
+ }
+}
+async function registerAccount(){
+ const email=document.getElementById("account-email")?.value.trim();
+ const password=document.getElementById("account-password")?.value||"";
+ if(!email||!password){setAccountMessage("Vui lòng nhập email và mật khẩu.",true);return;}
+ if(password.length<8){setAccountMessage("Mật khẩu cần ít nhất 8 ký tự.",true);return;}
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.auth.signUp({email,password});
+  if(error)throw error;
+  if(data.session){
+   showAccountState(data.user);
+   setAccountMessage("Đăng ký thành công! Bạn đã đăng nhập.");
+  }else{
+   setAccountMessage("Đăng ký đã nhận. Hãy mở email để xác nhận tài khoản trước khi đăng nhập.");
+  }
+ }catch(error){
+  setAccountMessage("Đăng ký chưa thành công: "+error.message,true);
+ }
+}
+async function loginAccount(){
+ const email=document.getElementById("account-email")?.value.trim();
+ const password=document.getElementById("account-password")?.value||"";
+ if(!email||!password){setAccountMessage("Vui lòng nhập email và mật khẩu.",true);return;}
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.auth.signInWithPassword({email,password});
+  if(error)throw error;
+  showAccountState(data.user);
+  setAccountMessage("Đăng nhập thành công!");
+ }catch(error){
+  setAccountMessage("Đăng nhập chưa thành công: "+error.message,true);
+ }
+}
+async function logoutAccount(){
+ try{
+  const client=await getSupabase();
+  const {error}=await client.auth.signOut();
+  if(error)throw error;
+  showAccountState(null);
+  setAccountMessage("Bạn đã đăng xuất. Vẫn có thể tham gia phòng với tư cách khách.");
+ }catch(error){
+  setAccountMessage("Đăng xuất chưa thành công: "+error.message,true);
+ }
+}
+
+function getMemberKey(){
+ let key=localStorage.getItem("nhau_member_key");
+ if(!key){key=crypto.randomUUID();localStorage.setItem("nhau_member_key",key);}
+ return key;
+}
+function askName(){const name=prompt("Nhập tên của bạn:");return name?.trim()||"";}
+async function createPrivateRoom(){
+ const name=askName();if(!name)return;
+ const roomName=prompt("Đặt tên phòng của bạn:");if(!roomName?.trim())return;
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.rpc("create_private_room",{p_name:roomName.trim(),p_host:name,p_member_key:getMemberKey()});
+  if(error)throw error;
+  const code=String(data).toUpperCase();
+  alert("Tạo phòng thành công!\nMã phòng: "+code);
+  await enterRoomByCode(code,name);
+ }catch(error){alert("Không tạo được phòng: "+error.message);}
+}
+async function enterPrivateRoom(){
+ const code=document.getElementById("join-code").value.trim().toUpperCase();
+ if(!code){alert("Vui lòng nhập mã phòng!");return;}
+ const name=askName();if(!name)return;
+ await enterRoomByCode(code,name);
+}
+async function enterRoomByCode(code,name){
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.rpc("join_private_room",{p_code:code,p_member_key:getMemberKey(),p_username:name});
+  if(error)throw error;
+  if(!data||data.length===0){alert("Không tìm thấy phòng hoặc phòng đã đóng!");return;}
+  const room=data[0];openChat("private:"+room.code,room.room_name,name,room.code);
+ }catch(error){alert("Lỗi tham gia phòng: "+error.message);}
+}
+async function joinRoom(room){const name=askName();if(!name)return;openChat(room,room,name,"");}
+
+async function addRoomUpgradeControl(screen,code){
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.rpc("is_private_room_host",{p_code:code,p_member_key:getMemberKey()});
+  if(error)throw error;
+  if(data!==true)return;
+  const upgrade=document.createElement("button");
+  upgrade.className="upgrade-button";
+  upgrade.textContent="⭐ Nâng cấp phòng";
+  upgrade.onclick=async()=>{
+   const choice=prompt("Chọn giới hạn thành viên mới:\n20 = Silver\n30 = Gold\n50 = Platinum\n100 = VIP\n\nNhập 20, 30, 50 hoặc 100:");
+   if(choice===null)return;
+   const newLimit=Number(choice.trim());
+   if(![20,30,50,100].includes(newLimit)){alert("Vui lòng nhập 20, 30, 50 hoặc 100.");return;}
+   try{
+    const {data,error}=await client.rpc("upgrade_private_room",{p_code:code,p_member_key:getMemberKey(),p_new_limit:newLimit});
+    if(error)throw error;
+    alert(data||"Nâng cấp phòng thành công!");
+   }catch(error){alert("Không nâng cấp được phòng: "+error.message);}
+  };
+  screen.appendChild(upgrade);
+ }catch(error){console.error("Không kiểm tra được quyền nâng cấp:",error);}
+}
+
+
+async function refreshRoomMembers(code){
+ const panel=document.getElementById("room-members");
+ if(!panel)return;
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.rpc("get_private_room_members",{p_code:code});
+  if(error)throw error;
+  panel.innerHTML="";
+  const heading=document.createElement("h3");
+  const count=data&&data.length?data[0].member_count:0;
+  const limit=data&&data.length?data[0].max_members:0;
+  heading.textContent="👥 Thành viên trong phòng ("+count+(limit?"/"+limit:"")+")";
+  panel.appendChild(heading);
+  if(!data||data.length===0){
+   const empty=document.createElement("div");
+   empty.className="member-row";
+   empty.textContent="Chưa có thông tin thành viên.";
+   panel.appendChild(empty);
+   return;
+  }
+  data.forEach(member=>{
+   const row=document.createElement("div");
+   row.className="member-row";
+   row.textContent="• "+member.username;
+   if(member.is_host===true){
+    const tag=document.createElement("span");
+    tag.className="host-tag";
+    tag.textContent="👑 Chủ phòng";
+    row.appendChild(tag);
+   }
+   panel.appendChild(row);
+  });
+ }catch(error){
+  console.error("Không tải được danh sách thành viên:",error);
+  panel.textContent="Chưa tải được danh sách thành viên. Vui lòng thử lại.";
+ }
+}
+async function leaveCurrentRoom(){
+ const code=currentPrivateCode;
+ const screen=document.getElementById("room-screen");
+ try{
+  if(currentChannel){
+   const client=await getSupabase();
+   await client.removeChannel(currentChannel);
+   currentChannel=null;
+  }
+  if(code){
+   const client=await getSupabase();
+   const {error}=await client.rpc("leave_private_room",{p_code:code,p_member_key:getMemberKey()});
+   if(error)throw error;
+  }
+  if(memberRefreshTimer){clearInterval(memberRefreshTimer);memberRefreshTimer=null;}
+  currentPrivateCode="";
+  currentRoom="";
+  currentUser="";
+  screen?.remove();
+ }catch(error){
+  alert("Chưa rời phòng được: "+error.message);
+ }
+}
+
+function openChat(roomKey,roomName,name,code){
+ if(memberRefreshTimer){clearInterval(memberRefreshTimer);memberRefreshTimer=null;}
+ currentPrivateCode="";
+ document.getElementById("room-screen")?.remove();
+ const screen=document.createElement("div");screen.id="room-screen";
+ const title=document.createElement("h1");title.textContent="🍻 "+roomName;screen.appendChild(title);
+ const welcome=document.createElement("p");welcome.textContent="Xin chào "+name+"!";screen.appendChild(welcome);
+ if(code){
+  const label=document.createElement("p");label.textContent="MÃ PHÒNG";label.className="small";screen.appendChild(label);
+  const codeText=document.createElement("div");codeText.id="room-code";codeText.textContent=code;screen.appendChild(codeText);
+  const share=document.createElement("button");share.textContent="📋 Sao chép mã mời";
+  share.onclick=async()=>{try{await navigator.clipboard.writeText(code);alert("Đã sao chép mã phòng!");}catch(e){prompt("Hãy sao chép mã phòng:",code);}};
+  screen.appendChild(share);
+  addRoomUpgradeControl(screen,code);
+
+  const members=document.createElement("div");
+  members.id="room-members";
+  members.textContent="Đang tải danh sách thành viên...";
+  screen.appendChild(members);
+
+  currentPrivateCode=code;
+  refreshRoomMembers(code);
+  if(memberRefreshTimer)clearInterval(memberRefreshTimer);
+  memberRefreshTimer=setInterval(()=>refreshRoomMembers(code),10000);
+ }
+ const box=document.createElement("div");box.id="chat-box";box.innerHTML="<p>🍻 Chào mừng bạn đến với phòng!</p>";screen.appendChild(box);
+ const form=document.createElement("div");form.className="chat-form";
+ const input=document.createElement("input");input.id="chat-input";input.placeholder="Nhập tin nhắn...";
+ const send=document.createElement("button");send.textContent="Gửi";send.onclick=sendMessage;
+ form.appendChild(input);form.appendChild(send);screen.appendChild(form);
+ if(code){
+  const leave=document.createElement("button");leave.className="leave-button";leave.textContent="🚪 Rời phòng";
+  leave.onclick=leaveCurrentRoom;screen.appendChild(leave);
+ }
+ const back=document.createElement("button");back.className="secondary";back.style.marginTop="12px";back.textContent="← Quay lại trang chủ";
+ back.onclick=leaveCurrentRoom;
+ screen.appendChild(back);document.body.appendChild(screen);
+ currentUser=name;currentRoom=roomKey;loadMessages(roomKey);listenForMessages(roomKey);
+}
+async function loadMessages(room){
+ const box=document.getElementById("chat-box");if(!box)return;box.innerHTML="";
+ try{
+  const client=await getSupabase();
+  const {data,error}=await client.from("messages").select("username,content,created_at").eq("room",room).order("created_at",{ascending:true}).limit(100);
+  if(error)throw error;
+  data.forEach(msg=>{const p=document.createElement("p");p.textContent=msg.username+": "+msg.content;box.appendChild(p);});
+  box.scrollTop=box.scrollHeight;
+ }catch(error){console.error("Lỗi tải tin nhắn:",error);}
+}
+async function listenForMessages(room){
+ const client=await getSupabase();if(currentChannel)await client.removeChannel(currentChannel);
+ currentChannel=client.channel("room-"+room).on("postgres_changes",{event:"INSERT",schema:"public",table:"messages",filter:"room=eq."+room},payload=>{
+  const msg=payload.new;if(msg.username===currentUser)return;
+  const box=document.getElementById("chat-box");if(!box)return;
+  const p=document.createElement("p");p.textContent=msg.username+": "+msg.content;box.appendChild(p);box.scrollTop=box.scrollHeight;
+ }).subscribe();
+}
+async function sendMessage(){
+ const input=document.getElementById("chat-input");if(!input||!input.value.trim())return;
+ const content=input.value.trim();if(!currentRoom||!currentUser)return;
+ try{
+  const client=await getSupabase();
+  const {error}=await client.from("messages").insert({room:currentRoom,username:currentUser,content});
+  if(error)throw error;
+  const box=document.getElementById("chat-box");const p=document.createElement("p");p.textContent=currentUser+": "+content;box.appendChild(p);
+  input.value="";box.scrollTop=box.scrollHeight;
+ }catch(error){alert("Lỗi gửi tin nhắn: "+error.message);}
+}
+</script>
+</body>
+</html>
